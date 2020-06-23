@@ -1,0 +1,160 @@
+@page "/employee"
+@inject HttpClient Http
+@inject IJSRuntime JsRuntime
+@using Models
+@using Microsoft.Extensions.Logging
+@inject ILogger<EmployeePage> Logger
+
+<h1>Employee</h1>
+
+<EditForm Model="_employee" Context="formContext">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+    <div class="form-group row">
+        <label for="firstName" class="col-sm-2 col-form-label">First Name</label>
+        <div class="col-sm-10">
+            <InputText class="form-control" @bind-Value="_employee.FirstName" placeholder="FirstName" />
+        </div>
+    </div>
+    <div class="form-group row">
+        <label for="lastName" class="col-sm-2 col-form-label">Last Name</label>
+        <div class="col-sm-10">
+            <InputText class="form-control" @bind-Value="_employee.LastName" placeholder="LastName" />
+        </div>
+    </div>
+    <input type="submit" value="Add" class="btn btn-primary" @onclick="@( async () => await Add(formContext))" />
+    <input type="submit" value="Update" class="btn btn-primary" @onclick="@(async ()=> await Update(_employee.Id))" />
+</EditForm>
+
+<br />
+
+@if (emps == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>FirstName</th>
+                <th>LastName</th>
+                <th>Control</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var emp in emps)
+            {
+                <tr>
+                    <td>@emp.Id</td>
+                    <td>@emp.FirstName</td>
+                    <td>@emp.LastName</td>
+                    <td>
+                        <input type="button" value="Edit" class="btn btn-primary" @onclick="@(async () => await Edit(emp.Id))" />
+                        <input type="button" value="Del" class="btn btn-danger" @onclick="@(async ()=> await Del(emp.Id))" />
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private List<Employee> emps;
+    private Employee _employee = new Employee();
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            emps = await Http.GetFromJsonAsync<List<Employee>>("api/Employees/");
+        }
+        catch (Exception ex)
+        {
+            await JsRuntime.InvokeAsync<string>(
+                "commonJsFunctions.alert",
+                $"發生錯誤 : {ex}");
+        }
+    }
+
+    private async Task Add(EditContext editContext)
+    {
+        if (editContext.Validate() == false)
+        {
+            return;
+        }
+
+        try
+        {
+            var result = await Http.PostAsJsonAsync<Employee>($"api/Employees/", _employee);
+
+            if(!result.IsSuccessStatusCode)
+            {
+                await JsRuntime.InvokeAsync<string>(
+                    "commonJsFunctions.alert",
+                    result.Content);
+                    return;
+            }
+
+            var emp = await result.Content.ReadFromJsonAsync<Employee>();
+
+            emps.Add(emp);
+            await JsRuntime.InvokeAsync<string>(
+                    "commonJsFunctions.alert",
+                    "新增完成");
+        }
+        catch (Exception ex)
+        {
+            await JsRuntime.InvokeAsync<string>(
+                "commonJsFunctions.alert",
+                $"發生錯誤 : {ex}");
+        }
+    }
+
+    private async Task Edit(int id)
+    {
+        try
+        {
+            _employee = await Http.GetFromJsonAsync<Employee>($"api/Employees/{id}");
+        }
+        catch (Exception ex)
+        {
+            await JsRuntime.InvokeAsync<string>(
+                "commonJsFunctions.alert",
+                $"發生錯誤 : {ex}");
+        }
+    }
+
+    private async Task Update(int id)
+    {
+        try
+        {
+            await Http.PutAsJsonAsync($"api/Employees/{id}", _employee);
+            var index = emps.FindIndex(m => m.Id == id);
+            emps[index] = _employee;
+        }
+        catch (Exception ex)
+        {
+            await JsRuntime.InvokeAsync<string>(
+                "commonJsFunctions.alert",
+                $"發生錯誤 : {ex}");
+        }
+    }
+
+    private async Task Del(int id)
+    {
+        try
+        {
+            await Http.DeleteAsync($"api/Employees/{id}");
+            var index = emps.FindIndex(m => m.Id == id);
+            emps.RemoveAt(index);
+        }
+        catch (Exception ex)
+        {
+            await JsRuntime.InvokeAsync<string>(
+                "commonJsFunctions.alert",
+                $"發生錯誤 : {ex}");
+        }
+    }
+}
