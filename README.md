@@ -1,4 +1,4 @@
-# CrudAspNetCore
+# CrudBlazorWasm
 CRUD - ASP.NET Core Blazor - 3.2
 
 ## 目標
