@@ -3,7 +3,9 @@
 @inject IJSRuntime JsRuntime
 @using Models
 @using Microsoft.Extensions.Logging
+@using Microsoft.Extensions.Configuration
 @inject ILogger<EmployeePage> Logger
+@inject IConfiguration Configuration
 
 <h1>Employee</h1>
 
@@ -68,6 +70,7 @@ else
     {
         try
         {
+            Logger.LogInformation("call API");
             emps = await Http.GetFromJsonAsync<List<Employee>>("api/Employees/");
         }
         catch (Exception ex)
