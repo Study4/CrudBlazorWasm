@@ -33,6 +33,7 @@ Update : 2020-12-12
 
 ## 環境參數
 
+* Development : API 連線到 http://localhost:5000
 * Tye : API 連線到 http://localhost:5000
 * Production : API 連線到 ???? ( 暫時設定 )
 
