@@ -19,11 +19,9 @@ namespace CrudBlazorWasm.Web
             builder.RootComponents.Add<App>("#app");
 
             builder.Services.AddScoped(sp => 
-                // new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
-                // 因為 Web Assambly 所以不支援 Tye 的 GetServiceUri
-                //new HttpClient { BaseAddress = builder.Configuration.GetServiceUri(name: "crudaspnetcore-api", binding: "https") });
-                new HttpClient { BaseAddress = new Uri( builder.Configuration.GetValue<string>("ApiBaseUrl")) } );
-
+            // new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
+            new HttpClient { BaseAddress = new Uri( builder.Configuration.GetValue<string>("ApiBaseUrl")) } );
+    
             builder.Logging.AddConfiguration(builder.Configuration.GetSection("Logging"));
 
             await builder.Build().RunAsync();

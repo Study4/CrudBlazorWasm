@@ -15,3 +15,10 @@ FROM base AS final
 ENV ASPNETCORE_ENVIRONMENT=Production
 COPY --from=publish /app/wwwroot /usr/share/nginx/html
 COPY nginx.conf /etc/nginx/nginx.conf
+# Copy the start script  
+COPY start.sh ./  
+# This command is optional,   
+# it is just used to make sure all the EOL unix compliant  
+RUN sed -i -e "s/\r$//" start.sh  
+# The command that will be executed when the container starts  
+CMD /bin/sh ./start.sh 
